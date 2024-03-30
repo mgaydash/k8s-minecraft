@@ -1,0 +1,106 @@
+nginx:
+  staticSitePVC: RELEASE_NAME-unmined-output # This will be overwritten to use Release.Name by install.sh
+  ingress:
+    enabled: true
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    hostname: unmined.k8s.mgaydash.com
+    ingressClassName: nginx
+    tls: true
+    extraTls:
+      - hosts:
+          - unmined.k8s.mgaydash.com
+        secretName: unmined.k8s.mgaydash.com
+  service:
+    type: ClusterIP
+minecraft:
+  resources:
+    requests:
+      memory: 2048Mi
+      cpu: 2000m
+  workloadAsStatefulSet: false
+  strategyType: Recreate
+  minecraftServer:
+    eula: "TRUE"
+    version: "LATEST"
+    type: "VANILLA"
+    forgeVersion:
+    spongeVersion:
+    forgeInstallerUrl:
+    bukkitDownloadUrl:
+    spigotDownloadUrl:
+    paperDownloadUrl:
+    ftbModpackId:
+    ftbModpackVersionId:
+    cfServerMod:
+    ftbLegacyJavaFixer: default
+    difficulty: normal
+    whitelist: "A_Space_Potato,BetaMaster64,Cosick241,Darkphantom66,EiB_inc,mgaydash,Moose_Lord,Raspizz,spambana,TDogg6031,tuggb0at"
+    ops: "A_Space_Potato,BetaMaster64,Cosick241,Darkphantom66,EiB_inc,mgaydash,Moose_Lord,Raspizz,spambana,TDogg6031,tuggb0at"
+    icon:
+    maxPlayers: 20
+    maxWorldSize: 10000
+    allowNether: default
+    announcePlayerAchievements: default
+    enableCommandBlock: default
+    forcegameMode: default
+    generateStructures: default
+    hardcore: default
+    maxBuildHeight: 256
+    maxTickTime: 60000
+    spawnAnimals: default
+    spawnMonsters: default
+    spawnNPCs: default
+    spawnProtection: 16
+    viewDistance: 10
+    levelSeed:
+    gameMode: survival
+    motd: "Now with SECURITY!!"
+    pvp: default
+    levelType: DEFAULT
+    generatorSettings:
+    worldSaveName: world
+    downloadWorldUrl:
+    forceReDownload: false
+    downloadModpackUrl:
+    removeOldMods: false
+    vanillaTweaksShareCodes: []
+    resourcePackUrl:
+    resourcePackSha:
+    resourcePackEnforce: false
+    onlineMode: default
+    enforceSecureProfile: default
+    memory: 2048M
+    jvmOpts: ""
+    jvmXXOpts: ""
+    overrideServerProperties: true
+    serviceType: ClusterIP
+    servicePort: 25565
+    rcon:
+      enabled: true
+      port: 25575
+      password:
+      existingSecret: RELEASE_NAME-rcon-pass # This will be overwritten to use Release.Name by install.sh
+      secretKey: rcon-password
+      serviceType: ClusterIP
+  persistence:
+    dataDir:
+      enabled: true
+      existingClaim: RELEASE_NAME-data # This will be overwritten to use Release.Name by install.sh
+  mcbackup:
+    enabled: true
+    initialDelay: 2m
+    backupInterval: 24h
+    pauseIfNoPlayers: "false"
+    pruneBackupsDays: 7
+    rconRetries: 5
+    rconRetryInterval: 10s
+    excludes: "*.jar,cache,logs"
+    backupMethod: tar
+    destDir: /backups
+    linkLatest: "false"
+    compressMethod: "gzip"
+    persistence:
+      backupDir:
+        enabled: true
+        existingClaim: RELEASE_NAME-backup # This will be overwritten to use Release.Name by install.sh

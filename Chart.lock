@@ -1,0 +1,9 @@
+dependencies:
+- name: minecraft
+  repository: https://itzg.github.io/minecraft-server-charts/
+  version: 4.14.0
+- name: nginx
+  repository: https://charts.bitnami.com/bitnami
+  version: 15.5.2
+digest: sha256:a8f826aa88f33f28a36e32ccad6fc5673fc892740ff89aa58bd2cbecff6a6d42
+generated: "2023-12-30T15:46:36.35328-05:00"

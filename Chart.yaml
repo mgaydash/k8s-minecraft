@@ -1,0 +1,13 @@
+apiVersion: v2
+name: minecraft
+description: Minecraft Server for DF in 2024
+type: application
+version: 0.0.1
+appVersion: "vanilla"
+dependencies:
+  - name: minecraft
+    version: 4.14.0
+    repository: https://itzg.github.io/minecraft-server-charts/
+  - name: nginx
+    version: 15.5.2
+    repository: https://charts.bitnami.com/bitnami

@@ -1,0 +1,67 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Release.Name }}-unmined
+spec:
+  schedule: "*/15 * * * *"
+  timeZone: "America/New_York"
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          containers:
+            - image: ich777/unmined
+              imagePullPolicy: IfNotPresent
+              name: {{ .Release.Name }}-unmined
+              command:
+                - /bin/bash
+              args:
+                - -c
+                - |
+                  if [ ! -f ${DATA_DIR}/unmined ]; then
+                    echo "---uNmINeD-GUI not found! Please wait, installing...---"
+                    cd ${DATA_DIR}
+                    if wget -q -nc --show-progress --progress=bar:force:noscroll -O ${DATA_DIR}/uNmINeD-${LAT_V}.tar.gz "https://unmined.net/download/unmined-gui-linux-x64-dev/" ; then
+                      echo "---Sucessfully downloaded uNmINeD-GUI---"
+                    else
+                      echo "---Something went wrong, can't download uNmINeD-GUI, putting container in sleep mode---"
+                      rm -rf ${DATA_DIR}/uNmINeD-${LAT_V}.tar.gz
+                      sleep infinity
+                    fi
+                    tar -C ${DATA_DIR} --overwrite --strip-components=1 -xf ${DATA_DIR}/uNmINeD-${LAT_V}.tar.gz
+                  fi
+                  if [ ! -f ${DATA_DIR}/unmined-cli ]; then
+                    echo "uNmINeD-CLI not found! Please wait, installing..."
+                    cd ${DATA_DIR}
+                    if wget -q -nc --show-progress --progress=bar:force:noscroll -O ${DATA_DIR}/uNmINeD-CLI.tar.gz "https://unmined.net/download/unmined-cli-linux-x64-dev/" ; then
+                      echo "---Sucessfully downloaded uNmINeD-CLI---"
+                    else
+                      echo "---Something went wrong, can't download uNmINeD-CLI, continuing---"
+                      rm -rf ${DATA_DIR}/uNmINeD-CLI.tar.gz
+                    fi
+                    tar -C ${DATA_DIR} --overwrite --strip-components=1 -xf ${DATA_DIR}/uNmINeD-CLI.tar.gz --wildcards unmined-cli*/unmined-cli unmined-cli*/README.md
+                    rm -f ${DATA_DIR}/uNmINeD-CLI.tar.gz
+                  fi
+                  echo "---Starting uNmINeD-CLI---"
+                  cd ${DATA_DIR}
+                  ${DATA_DIR}/unmined-cli web render --world="/data/world" --output="/unmined-output" --zoomout 4 --zoomin 3
+                  cp /unmined-output/unmined.index.html /unmined-output/index.html
+              volumeMounts:
+                - name: data
+                  mountPath: /data
+                - name: unmined-output
+                  mountPath: /unmined-output
+                - name: unmined-app
+                  mountPath: /unmined
+          restartPolicy: Never
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: {{ .Release.Name }}-data
+            - name: unmined-output
+              persistentVolumeClaim:
+                claimName: {{ .Release.Name }}-unmined-output
+            - name: unmined-app
+              persistentVolumeClaim:
+                claimName: {{ .Release.Name }}-unmined-app
