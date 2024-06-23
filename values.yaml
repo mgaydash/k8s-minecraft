@@ -1,3 +1,4 @@
+enable_backup: true
 nginx:
   staticSitePVC: RELEASE_NAME-unmined-output # This will be overwritten to use Release.Name by install.sh
   ingress:
@@ -96,7 +97,7 @@ minecraft:
     initialDelay: 2m
     backupInterval: 24h
     pauseIfNoPlayers: "false"
-    pruneBackupsDays: 7
+    pruneBackupsDays: 2
     rconRetries: 5
     rconRetryInterval: 10s
     excludes: "*.jar,cache,logs"

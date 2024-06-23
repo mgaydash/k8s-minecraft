@@ -22,6 +22,8 @@ fi
 
 helm upgrade \
   --install \
+  --set "aws_access_key_id=${S3_ADMIN_AWS_ACCESS_KEY_ID}" \
+  --set "aws_secret_access_key=${S3_ADMIN_AWS_SECRET_ACCESS_KEY}" \
   --set "minecraft.mcbackup.persistence.backupDir.existingClaim=${RELEASE_NAME}-backup" \
   --set "minecraft.persistence.dataDir.existingClaim=${RELEASE_NAME}-data" \
   --set "minecraft.minecraftServer.rcon.existingSecret=${RELEASE_NAME}-rcon-pass" \

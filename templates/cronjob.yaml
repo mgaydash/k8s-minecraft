@@ -1,0 +1,49 @@
+{{- if .Values.enable_backup }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "k8s-minecraft.fullname" . }}-backup
+spec:
+  schedule: "0 4 * * *"
+  timeZone: "America/New_York"
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                      - key: app.kubernetes.io/instance
+                        operator: In
+                        values:
+                          - {{ .Release.Name }}
+                  topologyKey: kubernetes.io/hostname
+          containers:
+            - image: amazon/aws-cli:2.11.27
+              imagePullPolicy: IfNotPresent
+              name: {{ include "k8s-minecraft.fullname" . }}-backup
+              command:
+                - /bin/bash
+              args:
+                - -c
+                - |
+                  LATEST=$(ls -t /backup | head -n 1)
+                  echo "Backup file: ${LATEST}"
+                  aws s3 cp \
+                    --no-progress \
+                    /backup/${LATEST} s3://backups.mgaydash.com/homelab0/{{ .Chart.Name }}/{{ .Release.Name }}/${LATEST}
+              envFrom:
+                - secretRef:
+                    name: {{ include "k8s-minecraft.fullname" . }}-creds
+              volumeMounts:
+                - name: backup
+                  mountPath: "/backup"
+          restartPolicy: Never
+          volumes:
+            - name: backup
+              persistentVolumeClaim:
+                claimName: {{ include "k8s-minecraft.fullname" . }}-backup
+{{- end }}
